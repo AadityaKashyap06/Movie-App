@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+      form{
+        margin: 20px;
+        background-color: teal;
+      }
+</style>
+<body>
+      <h1>Movie Booking</h1>  
+      <h2 id="tt">Total Booked:0</h2> 
+      <h4 id="kk">Find Slot:-</h4>
+        <input type="number" id="pp" oninput="findSlot()">
+        <form action="" id="kk1" onsubmit="Form(event)">
+            <label for="">UserName:-</label>
+            <input type="text" id="ss1">
+            <br>
+            <br>
+            <label for="">Seat Number:-</label>
+            <input type="number" id="ss2">
+            <br>
+            <br>
+            <input type="submit" value="Add">
+        </form>
+        <h1 id="ff">Nothing Present</h1>
+        <ul id="kk2" class="ee"></ul>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+<script>;
+     let count=0;
+    let no=document.getElementById("ff")
+    let head=document.getElementById("tt");
+  let name=document.getElementById("ss1")
+  let seat=document.getElementById("ss2");
+  let form=document.getElementById("kk1");
+  let list=document.getElementById("kk2");
+    async function Form(e){
+        e.preventDefault();
+        let obj={
+            name1:name.value,
+          seatno:seat.value
+        }
+      try {
+        let array= await axios.get(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data`);
+        let arr=array.data;
+          if(!(arr.some(x => x.seatno == obj.seatno))){
+            let ss=await axios.post(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data`,obj);
+       name.value="";
+       seat.value="";  
+       display(ss.data); 
+       count++; // Increment count after successful booking
+        head.innerHTML = `<h2>Total Booked: ${count}</h2>`;
+          }else{
+            alert(`Seat Not there`)
+          }
+      
+      } catch (error) {
+        console.log('error');
+        
+      }
+        
+    };
+ window.addEventListener("DOMContentLoaded",(e)=>{
+    head.innerHTML = `<h2>Total Booked: ${count}</h2>`;
+    axios.get(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data`).then((x)=>{
+        x.data.forEach(t => {
+              display(t);
+        });
+    }).catch((err)=>{
+        console.log(`error`)
+    });
+   
+ });
+    function display(obj){
+      no.remove();
+         
+        let li=document.createElement("li");
+        li.id=obj._id;
+        li.innerHTML=`${obj.name1}-${obj.seatno}-<button onclick="Del('${obj._id}')">Delete</button>-<button onclick="Edit('${obj.name1}','${obj._id}','${obj.seatno}')">Edit</button>`;
+        list.appendChild(li);
+    };
+    async function Del(id){
+        let list1=document.getElementById(`${id}`);
+        try {
+        await axios.delete(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data/${id}`);
+        list1.remove();   
+        count--;
+        head.innerHTML = `<h2>Total Booked: ${count}</h2>`;
+        } catch (error) {
+               console.log(`error`)
+        }
+    };
+  async function Edit(name,id,seat){
+        let list1=document.getElementById(`${id}`);
+    let name11=prompt("",name);
+    let seat11=prompt("",seat);
+    try {
+          await axios.put(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data/${id}`,{
+            name1:name11,
+            seatno:seat11
+          });
+          list1.innerHTML=`${name11}-${seat11}-<button onclick="Del('${id}')">Delete</button>-<button onclick="Edit('${name11}','${id}','${seat11}')">Edit</button>`;
+    } catch (error) {
+          console.log(`error`)
+    }
+  };
+  let find=document.getElementById("pp")
+async function findSlot() {
+    list.innerHTML =""; // Clear the list before displaying slots
+    let inputValue = document.getElementById("pp").value.trim(); // Trimmed input value
+    if (inputValue !== "") { // Check if input is not empty
+        let array = await axios.get(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data`);
+        let arr = array.data;
+        let filter = arr.filter((item) => item.seatno === inputValue);
+        filter.forEach((a, b) => {
+            display(a);
+        });
+    }else{
+        let array = await axios.get(`https://crudcrud.com/api/35bbebea592c415fac9e5347a493f876/form_data`);
+        let arr = array.data;
+        arr.forEach((a,b)=>{
+            display(a);
+        })
+    }
+}
+</script>
